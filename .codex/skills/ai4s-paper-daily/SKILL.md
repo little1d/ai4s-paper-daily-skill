@@ -50,8 +50,7 @@ description: "AI4S 论文日报 skill：helper script 负责选篇/MinerU/飞书
 
 回退：
 
-- `pdftotext`
-- `pdfminer`
+- 无回退，拿不到可靠 MinerU 全文就不要正式评分
 
 如果拿不到足够可靠的全文，不要正式评分。
 
@@ -62,12 +61,12 @@ description: "AI4S 论文日报 skill：helper script 负责选篇/MinerU/飞书
 用 helper script：
 
 ```bash
-python scripts/ai4s_paper_daily.py \
+python .codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py \
   --date today \
-  --output-root outputs \
+  --output-root outputs/daily-runs \
   --history-pool data/history_pool.json \
   --extract-only \
-  --fulltext-backend auto
+  --fulltext-backend mineru
 ```
 
 这一步会生成：
@@ -122,7 +121,7 @@ python scripts/ai4s_paper_daily.py \
 | PDF 链接 | ... |
 | 代码链接 | ... |
 | Demo 链接 | ... |
-| 全文解析 | mineru / pdftotext / pdfminer |
+| 全文解析 | mineru |
 
 ### 📌 简介
 2-4 句话，讲清：
@@ -185,7 +184,7 @@ python scripts/ai4s_paper_daily.py \
 ```bash
 lark-cli docs +create \
   --title "AI4S 论文速递 YYYY-MM-DD" \
-  --markdown @outputs/.../report.md \
+  --markdown @outputs/daily-runs/.../report.md \
   --wiki-node "$FEISHU_WIKI_NODE"
 ```
 
@@ -195,7 +194,7 @@ lark-cli docs +create \
 lark-cli docs +update \
   --doc "$FEISHU_DOC" \
   --mode overwrite \
-  --markdown @outputs/.../report.md
+  --markdown @outputs/daily-runs/.../report.md
 ```
 
 ### 第六步：插入 MinerU 图片（可选但推荐）
@@ -222,10 +221,10 @@ lark-cli docs +media-insert \
 
 ## Helper 文件
 
-- `scripts/ai4s_paper_daily.py`
+- `.codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py`
   - 候选筛选
   - 全文下载
-  - MinerU / fallback 解析
+  - MinerU 解析
   - `extraction_manifest.json` 输出
 - `data/history_pool.json`
   - 历史优质论文池，必须全是真实论文

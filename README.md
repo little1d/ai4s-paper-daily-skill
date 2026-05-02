@@ -2,14 +2,12 @@
 
 面向 AI4S 的 **workflow-first 论文日报 skill / helper runner**。
 
-这版不再把核心目标定义成“抓取和归档尽可能多的论文”，而是采用 **workflow-first** 的 AI4S 论文日报方式：
-
 - 先拿候选池
 - 再按你的兴趣方向选出 **少量高相关论文**
 - 对最终入选论文做 **全文门槛检查**
 - 由当前 Codex / Claude **读完全文后**产出中文精读模板 + 毒舌点评 + 10 分制评分
 - 写入 **飞书文档**
-- 优先使用 **MinerU** 做 PDF 全文解析，失败时回退到 `pdftotext / pdfminer`
+- 优先使用 **MinerU** 做 PDF 全文解析，并默认强制走 CPU，避免 Apple GPU / MPS 路径不稳定
 
 ## 当前首版边界
 
@@ -32,21 +30,6 @@
 - 最终精读不应该由规则模板直接生成
 - helper script 负责：筛选 / 下载 / 解析 / 落盘
 - 真正的精读由 skill 加载后的 LLM 自己读取 MinerU 结果后完成
-
-### 首版更像什么
-
-- 面向 AI4S 的精读日报 skill
-- **workflow-first**
-- **doc-first**
-- **fulltext-gated**
-
-### 首版明确不做什么
-
-- 自动调度
-- 大规模本地 archive/database
-- 通用推荐系统
-- 飞书机器人额外发消息（当前是 `doc-only`）
-- 只靠 abstract 的轻量点评
 
 ## 数据流
 
@@ -87,6 +70,7 @@
 - 不允许 `example.com / placeholder / Starter Pool`
 
 这样做的原因是：
+
 - 先把“历史优质论文补充”做稳
 - 避免第一版一上来陷进复杂的全网历史检索
 
@@ -95,21 +79,21 @@
 ### 1. dry-run（推荐先跑）
 
 ```bash
-python scripts/ai4s_paper_daily.py \
+python .codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py \
   --date 2026-05-01 \
   --dry-run \
-  --fixtures tests/fixtures \
-  --output-root outputs/workflow-test-run
+  --fixtures .codex/skills/ai4s-paper-daily/tests/fixtures \
+  --output-root outputs/test-smoke-run
 ```
 
 ### 2. skill-first 准备运行
 
 ```bash
-python scripts/ai4s_paper_daily.py \
+python .codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py \
   --date today \
-  --output-root outputs \
+  --output-root outputs/daily-runs \
   --history-pool data/history_pool.json \
-  --fulltext-backend auto \
+  --fulltext-backend mineru \
   --extract-only
 ```
 
@@ -117,17 +101,10 @@ python scripts/ai4s_paper_daily.py \
 
 - `selected.json`
 - `extraction_manifest.json`
-- MinerU / fallback 解析产物
+- MinerU 解析产物
 
 后续由 skill 读取这些文件，完成真正的 LLM 精读。
 
-### 3. 如果在新的 tmux pane 里联网
-
-```bash
-export https_proxy=http://127.0.0.1:7897 \
-       http_proxy=http://127.0.0.1:7897 \
-       all_proxy=socks5://127.0.0.1:7897
-```
 
 ### 4. MinerU 模型缓存位置
 
@@ -170,6 +147,7 @@ OUTPUT_ROOT/
 ```
 
 说明：
+
 - `selected.json`：最终 shortlist（含相关性信息）
 - `extraction_manifest.json`：给 skill / LLM 读全文时使用的解析清单（含 markdown、pdf、图片路径）
 - `reviewed.json`：正式入选并完成全文门槛的论文
@@ -181,20 +159,17 @@ OUTPUT_ROOT/
 
 默认：
 
-- `--fulltext-backend auto`
+- `--fulltext-backend mineru`
 
 含义：
 
-1. 先尝试 `MinerU`
-2. 若失败则回退 `pdftotext`
-3. 还不行再回退 `pdfminer`
-
-可选值：
-
-- `auto`
 - `mineru`
-- `pdftotext`
-- `pdfminer`
+
+默认设备：
+
+- `MINERU_DEVICE_MODE=cpu`
+
+如果你确认本机别的设备路径稳定，可以显式覆盖。
 
 ## Skill 加载入口
 
@@ -247,18 +222,18 @@ $ai4s-paper-daily 帮我生成今天的 AI4S 飞书论文日报，重点看 prot
 先执行：
 
 ```bash
-python scripts/ai4s_paper_daily.py \
+python .codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py \
   --date today \
-  --output-root outputs \
+  --output-root outputs/daily-runs \
   --history-pool data/history_pool.json \
-  --fulltext-backend auto \
+  --fulltext-backend mineru \
   --extract-only
 ```
 
 然后对 Codex / Claude 说：
 
 ```text
-$ai4s-paper-daily 请读取 outputs/YYYY-MM-DD/extraction_manifest.json，基于 MinerU 全文结果完成正式精读，并写入飞书文档
+$ai4s-paper-daily 请读取 outputs/daily-runs/YYYY-MM-DD/extraction_manifest.json，基于 MinerU 全文结果完成正式精读，并写入飞书文档
 ```
 
 ### 触发时建议说清楚的东西
@@ -274,9 +249,9 @@ $ai4s-paper-daily 请读取 outputs/YYYY-MM-DD/extraction_manifest.json，基于
 如果你想强制只走 MinerU：
 
 ```bash
-python scripts/ai4s_paper_daily.py \
+python .codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py \
   --date today \
-  --output-root outputs \
+  --output-root outputs/daily-runs \
   --history-pool data/history_pool.json \
   --fulltext-backend mineru
 ```
@@ -316,26 +291,6 @@ source .env.local
 set +a
 ```
 
-### 推荐 scopes 配置
-
-仓库内提供：
-
-```text
-configs/feishu-app-scopes.json
-```
-
-当前建议覆盖：
-
-- `docx:document:create`
-- `docx:document:readonly`
-- `docx:document:write_only`
-- `wiki:node:read`
-- `wiki:node:create`
-- `auth:user.id:read`
-- `contact:user.basic_profile:readonly`
-- `im:message:send_as_bot`（给以后扩展 bot 消息留口）
-- `im:chat:read`（给以后按群定位留口）
-
 ### 失败语义
 
 - 默认：飞书失败 **不阻塞** 本地日报生成
@@ -345,15 +300,15 @@ configs/feishu-app-scopes.json
 ## 测试
 
 ```bash
-python -m unittest discover -s tests
+python -m unittest discover -s .codex/skills/ai4s-paper-daily/tests
 ```
 
 ## 文件说明
 
 | 文件 | 说明 |
 |---|---|
-| `scripts/ai4s_paper_daily.py` | workflow-first runner |
+| `.codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py` | skill-local runner entrypoint |
+| `scripts/ai4s_paper_daily.py` | runner implementation |
 | `data/history_pool.json` | 历史优质论文 starter pool |
-| `configs/feishu-app-scopes.json` | 推荐飞书应用 scopes 配置 |
-| `tests/fixtures/` | dry-run fixtures |
-| `tests/` | relevance / selection / rendering / smoke tests |
+| `.codex/skills/ai4s-paper-daily/tests/fixtures/` | dry-run fixtures |
+| `.codex/skills/ai4s-paper-daily/tests/` | relevance / selection / rendering / smoke tests |

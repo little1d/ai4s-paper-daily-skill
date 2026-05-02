@@ -5,8 +5,11 @@ import subprocess
 import sys
 import unittest
 
-ROOT = Path(__file__).resolve().parents[1]
-RUN_DIR = ROOT / "outputs" / "workflow-test-run"
+REPO_ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / ".git").exists())
+SKILL_ROOT = REPO_ROOT / ".codex" / "skills" / "ai4s-paper-daily"
+RUN_DIR = REPO_ROOT / "outputs" / "test-smoke-run"
+RUNNER = SKILL_ROOT / "scripts" / "ai4s_paper_daily.py"
+FIXTURES = SKILL_ROOT / "tests" / "fixtures"
 
 
 class SmokeTests(unittest.TestCase):
@@ -15,10 +18,10 @@ class SmokeTests(unittest.TestCase):
             shutil.rmtree(RUN_DIR)
         cmd = [
             sys.executable,
-            str(ROOT / "scripts" / "ai4s_paper_daily.py"),
+            str(RUNNER),
             "--date", "2026-05-01",
             "--dry-run",
-            "--fixtures", str(ROOT / "tests" / "fixtures"),
+            "--fixtures", str(FIXTURES),
             "--output-root", str(RUN_DIR),
         ]
         proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -42,15 +45,15 @@ class SmokeTests(unittest.TestCase):
         self.assertIn("fulltext_backend", manifest[0])
 
     def test_extract_only_emits_manifest_without_reviews(self):
-        run_dir = ROOT / "outputs" / "workflow-extract-only"
+        run_dir = REPO_ROOT / "outputs" / "test-extract-only-run"
         if run_dir.exists():
             shutil.rmtree(run_dir)
         cmd = [
             sys.executable,
-            str(ROOT / "scripts" / "ai4s_paper_daily.py"),
+            str(RUNNER),
             "--date", "2026-05-01",
             "--dry-run",
-            "--fixtures", str(ROOT / "tests" / "fixtures"),
+            "--fixtures", str(FIXTURES),
             "--output-root", str(run_dir),
             "--extract-only",
         ]

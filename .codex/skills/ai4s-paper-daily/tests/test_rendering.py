@@ -3,8 +3,11 @@ from pathlib import Path
 import sys
 import unittest
 
-ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("ai4s_runner", ROOT / "scripts" / "ai4s_paper_daily.py")
+REPO_ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / ".git").exists())
+SPEC = importlib.util.spec_from_file_location(
+    "ai4s_runner",
+    REPO_ROOT / ".codex" / "skills" / "ai4s-paper-daily" / "scripts" / "ai4s_paper_daily.py",
+)
 MOD = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = MOD
 SPEC.loader.exec_module(MOD)

@@ -17,7 +17,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / ".git").exists())
 MINERU_CACHE_ROOT = REPO_ROOT / ".cache" / "mineru-models"
 
 ARXIV_PAPERS_COOL_CATEGORIES = ["q-bio.BM", "q-bio.QM", "cs.LG", "cs.AI"]
@@ -202,7 +202,7 @@ class SourceFetchError(Exception):
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="AI4S workflow-first paper daily runner")
     p.add_argument("--date", default="today", help="YYYY-MM-DD or 'today'")
-    p.add_argument("--output-root", default="outputs")
+    p.add_argument("--output-root", default="outputs/daily-runs")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--fixtures", help="Fixture directory for dry-run")
     p.add_argument("--history-pool", default="data/history_pool.json")
@@ -211,7 +211,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--max-total", type=int, default=10)
     p.add_argument("--today-min", type=int, default=3)
     p.add_argument("--today-max", type=int, default=5)
-    p.add_argument("--fulltext-backend", choices=["auto", "mineru", "pdftotext", "pdfminer"], default=os.environ.get("AI4S_FULLTEXT_BACKEND", "auto"))
+    p.add_argument("--fulltext-backend", choices=["mineru"], default=os.environ.get("AI4S_FULLTEXT_BACKEND", "mineru"))
     p.add_argument("--extract-only", action="store_true", help="only select papers and parse fulltext assets for skill-driven review")
     return p.parse_args(argv)
 
@@ -499,21 +499,6 @@ def select_final_candidates(today: list[ScoredCandidate], history: list[ScoredCa
     return sorted(selected, key=lambda x: (0 if x.paper.source_type == "today" else 1, -x.relevance_score, x.paper.title.lower()))[:max_total]
 
 
-def extract_with_pdfminer(pdf_path: Path) -> str:
-    from pdfminer.high_level import extract_text  # type: ignore
-    return extract_text(str(pdf_path))
-
-
-def extract_with_pdftotext(pdf_path: Path, txt_path: Path) -> str:
-    pdftotext_bin = shutil.which("pdftotext")
-    if not pdftotext_bin:
-        return ""
-    proc = subprocess.run([pdftotext_bin, str(pdf_path), str(txt_path)], capture_output=True, text=True)
-    if proc.returncode == 0 and txt_path.exists():
-        return txt_path.read_text(encoding="utf-8", errors="ignore")
-    return ""
-
-
 def clean_mineru_markdown(text: str) -> str:
     cleaned = text.replace("\r", "\n")
     cleaned = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", cleaned)
@@ -554,6 +539,7 @@ def extract_with_mineru(pdf_path: Path, cache_dir: Path, stem: str) -> LoadedFul
         **os.environ,
         "MINERU_MODEL_SOURCE": os.environ.get("MINERU_MODEL_SOURCE", "modelscope"),
         "MODELSCOPE_CACHE": os.environ.get("MODELSCOPE_CACHE", str(modelscope_cache)),
+        "MINERU_DEVICE_MODE": os.environ.get("MINERU_DEVICE_MODE", "cpu"),
     }
     if os.environ.get("HF_HOME"):
         mineru_env["HF_HOME"] = os.environ["HF_HOME"]
@@ -594,14 +580,6 @@ def download_pdf(pdf_url: str, cache_dir: Path, stem: str) -> Path | None:
         return None
 
 
-def build_backend_order(preference: str) -> list[str]:
-    if preference == "auto":
-        order = ["mineru", "pdftotext", "pdfminer"]
-    else:
-        order = [preference]
-    return order
-
-
 def load_fulltext(scored: ScoredCandidate, *, run_dir: Path, base_dir: Path | None, backend_preference: str) -> LoadedFulltext:
     direct = resolve_candidate_fulltext_path(scored.paper, base_dir)
     if direct.strip():
@@ -611,24 +589,15 @@ def load_fulltext(scored: ScoredCandidate, *, run_dir: Path, base_dir: Path | No
     pdf_path = download_pdf(scored.paper.pdf_url, cache_dir, stem)
     if pdf_path is None:
         return LoadedFulltext(text="", backend="missing-pdf")
-    txt_path = cache_dir / f"{stem}.txt"
-    for backend in build_backend_order(backend_preference):
-        try:
-            if backend == "mineru":
-                loaded = extract_with_mineru(pdf_path, cache_dir, stem)
-            elif backend == "pdftotext":
-                text = extract_with_pdftotext(pdf_path, txt_path)
-                loaded = LoadedFulltext(text=text, backend=backend, path=str(pdf_path))
-            else:
-                text = extract_with_pdfminer(pdf_path)
-                if text.strip():
-                    txt_path.write_text(text, encoding="utf-8")
-                loaded = LoadedFulltext(text=text, backend=backend, path=str(pdf_path))
-            if loaded.text.strip():
-                return loaded
-        except Exception:
-            continue
-    return LoadedFulltext(text="", backend="parse-failed", path=str(pdf_path))
+    try:
+        loaded = extract_with_mineru(pdf_path, cache_dir, stem)
+    except Exception:
+        return LoadedFulltext(text="", backend="mineru-exception", path=str(pdf_path))
+    if loaded.text.strip():
+        return loaded
+    if not loaded.path:
+        loaded.path = str(pdf_path)
+    return loaded
 
 
 def normalize_fulltext(text: str) -> str:
