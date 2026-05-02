@@ -1,0 +1,8 @@
+Introduction
+GeoDiff targets molecular conformation generation with geometric diffusion.
+Method
+It uses SE(3)-equivariant parameterization and diffusion transitions over molecular geometry.
+Experiments
+The paper reports improvements on conformation benchmarks and includes ablations over geometry-aware design choices.
+Conclusion
+This is a clean historical paper for molecule generation and diffusion methods.

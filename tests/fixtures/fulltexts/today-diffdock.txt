@@ -1,0 +1,8 @@
+Introduction
+We study protein-ligand docking with a diffusion model that predicts binding poses and confidence.
+Method
+The framework alternates pose denoising, confidence calibration, and affinity-aware ranking.
+Experiments
+On docking benchmarks we outperform classical baselines on top-1 success rate and show robust ablations. Code is available at https://github.com/example/diffdock-today.
+Conclusion
+This is a practical docking paper with enough method and experiment substance.

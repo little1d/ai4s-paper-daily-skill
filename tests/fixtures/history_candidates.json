@@ -1,0 +1,41 @@
+[
+  {
+    "source": "curated",
+    "source_type": "history",
+    "source_id": "hist-diffdock",
+    "title": "DiffDock: Diffusion Steps, Twists, and Turns for Molecular Docking",
+    "authors": ["Gabriele Corso", "Hannes Stark"],
+    "abstract": "A diffusion-based approach for flexible molecular docking with confidence estimation.",
+    "published_date": "2023-01-01",
+    "url": "https://arxiv.org/abs/2210.01776",
+    "pdf_url": "",
+    "venue": "ICLR",
+    "fulltext_path": "fulltexts/history-diffdock.txt"
+  },
+  {
+    "source": "curated",
+    "source_type": "history",
+    "source_id": "hist-geodiff",
+    "title": "GeoDiff: a Geometric Diffusion Model for Molecular Conformation Generation",
+    "authors": ["Minkai Xu"],
+    "abstract": "Geometric diffusion for molecular conformation generation with SE(3) equivariance.",
+    "published_date": "2022-01-01",
+    "url": "https://arxiv.org/abs/2203.02923",
+    "pdf_url": "",
+    "venue": "ICLR",
+    "fulltext_path": "fulltexts/history-geodiff.txt"
+  },
+  {
+    "source": "curated",
+    "source_type": "history",
+    "source_id": "hist-progen",
+    "title": "ProGen: Language Modeling for Protein Generation",
+    "authors": ["Ali Madani"],
+    "abstract": "Protein language modeling for controllable protein generation and functional sequence design.",
+    "published_date": "2020-01-01",
+    "url": "https://arxiv.org/abs/2004.03497",
+    "pdf_url": "",
+    "venue": "Nature Machine Intelligence",
+    "fulltext_path": "fulltexts/history-progen.txt"
+  }
+]

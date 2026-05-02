@@ -1,0 +1,8 @@
+Introduction
+This paper focuses on post training molecular representations for drug discovery.
+Method
+We continue pretraining a molecular encoder with contrastive and preference-aligned objectives.
+Experiments
+We test on ADMET, property prediction, and scaffold split benchmarks. The representation improves multiple downstream tasks and includes ablations.
+Conclusion
+The work is useful for researchers who care about representation transfer rather than end-to-end generation only.

@@ -1,0 +1,8 @@
+Introduction
+We present a flow matching system for small-molecule conformation generation.
+Method
+The model uses SE(3)-aware flow matching and property-aware conditioning.
+Experiments
+Results on conformation benchmarks show better coverage and matching scores than diffusion baselines, with an open-source implementation.
+Conclusion
+The paper is directly relevant to molecular generation and worth checking if you work on geometry-aware generation.

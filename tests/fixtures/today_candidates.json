@@ -1,0 +1,80 @@
+[
+  {
+    "source": "arxiv",
+    "source_type": "today",
+    "source_id": "today-protein-flow",
+    "title": "Flow Matching for Protein Sequence Design",
+    "authors": ["Alice Zhang", "Bob Li"],
+    "abstract": "We introduce flow matching for protein sequence design with representation learning and biological sequence priors.",
+    "published_date": "2026-05-01",
+    "url": "https://arxiv.org/abs/2605.00001",
+    "pdf_url": "",
+    "venue": "arXiv",
+    "fulltext_path": "fulltexts/today-protein-flow.txt"
+  },
+  {
+    "source": "arxiv",
+    "source_type": "today",
+    "source_id": "today-diffdock",
+    "title": "Diffusion Models for Protein-Ligand Docking",
+    "authors": ["Chen Wu"],
+    "abstract": "A diffusion framework for protein-ligand docking with binding affinity prediction and confidence ranking.",
+    "published_date": "2026-05-01",
+    "url": "https://arxiv.org/abs/2605.00002",
+    "pdf_url": "",
+    "venue": "arXiv",
+    "fulltext_path": "fulltexts/today-diffdock.txt"
+  },
+  {
+    "source": "arxiv",
+    "source_type": "today",
+    "source_id": "today-repr",
+    "title": "Post-Training Molecular Representations for Drug Discovery",
+    "authors": ["Dana Xu"],
+    "abstract": "We study post training and representation learning for molecular property prediction in drug discovery.",
+    "published_date": "2026-05-01",
+    "url": "https://arxiv.org/abs/2605.00003",
+    "pdf_url": "",
+    "venue": "arXiv",
+    "fulltext_path": "fulltexts/today-repr.txt"
+  },
+  {
+    "source": "biorxiv",
+    "source_type": "today",
+    "source_id": "today-smallmol",
+    "title": "Flow Matching for Small-Molecule Conformation Generation",
+    "authors": ["Frank Mo"],
+    "abstract": "We build a flow matching model for small-molecule conformation generation and property-aware sampling.",
+    "published_date": "2026-05-01",
+    "url": "https://biorxiv.org/content/example-smallmol",
+    "pdf_url": "",
+    "venue": "bioRxiv",
+    "fulltext_path": "fulltexts/today-smallmol.txt"
+  },
+  {
+    "source": "biorxiv",
+    "source_type": "today",
+    "source_id": "today-cellbio",
+    "title": "Cellular Imaging of Macrophage Activation",
+    "authors": ["Grace Sun"],
+    "abstract": "We investigate macrophage activation in cell biology using microscopy assays.",
+    "published_date": "2026-05-01",
+    "url": "https://biorxiv.org/content/example-cellbio",
+    "pdf_url": "",
+    "venue": "bioRxiv",
+    "fulltext_path": "fulltexts/today-cellbio.txt"
+  },
+  {
+    "source": "biorxiv",
+    "source_type": "today",
+    "source_id": "today-neuro",
+    "title": "Diffusion MRI in Developmental Neuroscience",
+    "authors": ["Henry Zhou"],
+    "abstract": "We study diffusion MRI signals during developmental neuroscience experiments.",
+    "published_date": "2026-05-01",
+    "url": "https://biorxiv.org/content/example-neuro",
+    "pdf_url": "",
+    "venue": "bioRxiv",
+    "fulltext_path": "fulltexts/today-neuro.txt"
+  }
+]

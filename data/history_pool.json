@@ -1,0 +1,50 @@
+[
+  {
+    "source": "curated",
+    "source_type": "history",
+    "source_id": "hist-diffdock",
+    "title": "DiffDock: Diffusion Steps, Twists, and Turns for Molecular Docking",
+    "authors": ["Gabriele Corso", "Hannes Stark", "Bowen Jing", "Regina Barzilay", "Tommi Jaakkola"],
+    "abstract": "A diffusion generative model over the non-Euclidean manifold of ligand poses for molecular docking, with confidence estimates and strong top-1 success on PDBBind.",
+    "published_date": "2022-10-04",
+    "url": "https://arxiv.org/abs/2210.01776",
+    "pdf_url": "https://arxiv.org/pdf/2210.01776.pdf",
+    "venue": "ICLR"
+  },
+  {
+    "source": "curated",
+    "source_type": "history",
+    "source_id": "hist-geodiff",
+    "title": "GeoDiff: a Geometric Diffusion Model for Molecular Conformation Generation",
+    "authors": ["Minkai Xu", "Lantao Yu", "Yang Song", "Chence Shi", "Stefano Ermon", "Jian Tang"],
+    "abstract": "A geometric diffusion model for molecular conformation generation with equivariant Markov kernels and strong results on multiple conformation benchmarks.",
+    "published_date": "2022-03-06",
+    "url": "https://arxiv.org/abs/2203.02923",
+    "pdf_url": "https://arxiv.org/pdf/2203.02923.pdf",
+    "venue": "ICLR"
+  },
+  {
+    "source": "curated",
+    "source_type": "history",
+    "source_id": "hist-progen",
+    "title": "ProGen: Language Modeling for Protein Generation",
+    "authors": ["Ali Madani", "Bryan McCann", "Nikhil Naik", "Nitish Shirish Keskar", "Namrata Anand", "Raphael R. Eguchi", "Po-Ssu Huang", "Richard Socher"],
+    "abstract": "A 1.2B-parameter protein language model trained on about 280M sequences for controllable protein generation with taxonomic and keyword conditioning.",
+    "published_date": "2020-03-08",
+    "url": "https://arxiv.org/abs/2004.03497",
+    "pdf_url": "https://arxiv.org/pdf/2004.03497.pdf",
+    "venue": "Nature Machine Intelligence"
+  },
+  {
+    "source": "curated",
+    "source_type": "history",
+    "source_id": "hist-molclr",
+    "title": "Molecular Contrastive Learning of Representations via Graph Neural Networks",
+    "authors": ["Yuyang Wang", "Jianren Wang", "Zhonglin Cao", "Amir Barati Farimani"],
+    "abstract": "A self-supervised molecular representation learning framework that uses graph augmentations and contrastive objectives to improve downstream molecular property prediction after fine-tuning.",
+    "published_date": "2021-02-19",
+    "url": "https://arxiv.org/abs/2102.10056",
+    "pdf_url": "https://arxiv.org/pdf/2102.10056.pdf",
+    "venue": "arXiv"
+  }
+]

@@ -1,0 +1,8 @@
+Introduction
+We analyze diffusion MRI in developmental neuroscience.
+Method
+The work studies imaging biomarkers instead of generative modeling or AI4S methods.
+Experiments
+The paper contains neuroscience analysis without protein, molecule, docking, representation, or post-training relevance.
+Conclusion
+It should not survive the final shortlist for this workflow.

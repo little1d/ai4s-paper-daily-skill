@@ -1,0 +1,8 @@
+Introduction
+We investigate macrophage activation with imaging assays.
+Method
+The study relies on wet-lab microscopy and staining protocols.
+Experiments
+We report biological observations but no machine learning model, benchmark, or representation method.
+Conclusion
+This is biology-first and not the type of ML-heavy AI4S paper targeted by the skill.

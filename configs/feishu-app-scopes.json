@@ -1,0 +1,18 @@
+{
+  "scopes": {
+    "tenant": [
+      "auth:user.id:read",
+      "contact:user.basic_profile:readonly",
+      "docx:document:create",
+      "docx:document:readonly",
+      "docx:document:write_only",
+      "im:chat:read",
+      "im:message:send_as_bot",
+      "wiki:node:create",
+      "wiki:node:read"
+    ],
+    "user": [
+      "docx:document:readonly"
+    ]
+  }
+}

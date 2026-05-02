@@ -1,0 +1,8 @@
+Introduction
+We propose a flow matching framework for protein sequence design. The goal is to improve controllable biological sequence generation with stronger representation learning.
+Method
+Our model combines a protein language model backbone with flow matching objectives and sequence-level constraints.
+Experiments
+We evaluate on multiple protein family design benchmarks, compare against autoregressive and diffusion baselines, and report stronger sequence fitness with ablations.
+Conclusion
+The method is useful when researchers want targeted protein design instead of generic sequence generation.

@@ -1,0 +1,8 @@
+Introduction
+ProGen applies language modeling to protein generation.
+Method
+The work scales protein language modeling, conditions generation, and studies function-aware sequence generation.
+Experiments
+It evaluates biological activity and sequence quality across multiple tasks and makes a compelling case for protein language models.
+Conclusion
+This is a foundational historical paper for protein generation and representation-oriented reading.

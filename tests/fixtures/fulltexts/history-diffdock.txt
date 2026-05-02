@@ -1,0 +1,8 @@
+Introduction
+DiffDock studies molecular docking with a diffusion-based model and confidence estimates.
+Method
+The system predicts ligand poses, uses geometric denoising, and ranks candidates by confidence.
+Experiments
+It evaluates on realistic docking benchmarks, compares with strong baselines, and reports clear gains. Code is available at https://github.com/gcorso/DiffDock.
+Conclusion
+This is a strong historical reference paper whenever docking is a current focus.
