@@ -307,8 +307,7 @@ python -m unittest discover -s .codex/skills/ai4s-paper-daily/tests
 
 | 文件 | 说明 |
 |---|---|
-| `.codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py` | skill-local runner entrypoint |
-| `scripts/ai4s_paper_daily.py` | runner implementation |
+| `.codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py` | skill-local runner |
 | `data/history_pool.json` | 历史优质论文 starter pool |
 | `.codex/skills/ai4s-paper-daily/tests/fixtures/` | dry-run fixtures |
 | `.codex/skills/ai4s-paper-daily/tests/` | relevance / selection / rendering / smoke tests |
