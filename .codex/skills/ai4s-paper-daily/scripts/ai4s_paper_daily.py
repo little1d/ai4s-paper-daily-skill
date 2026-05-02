@@ -199,6 +199,36 @@ class SourceFetchError(Exception):
     pass
 
 
+def parse_dotenv_line(raw_line: str) -> tuple[str, str] | None:
+    line = raw_line.strip()
+    if not line or line.startswith("#") or "=" not in line:
+        return None
+    key, value = line.split("=", 1)
+    key = key.strip()
+    value = value.strip()
+    if not key:
+        return None
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        value = value[1:-1]
+    return key, value
+
+
+def load_local_env(root: Path = REPO_ROOT) -> dict[str, str]:
+    loaded: dict[str, str] = {}
+    for name in [".env.local", ".env"]:
+        path = root / name
+        if not path.exists():
+            continue
+        for raw_line in path.read_text(encoding="utf-8").splitlines():
+            parsed = parse_dotenv_line(raw_line)
+            if parsed is None:
+                continue
+            key, value = parsed
+            loaded[key] = value
+            os.environ.setdefault(key, value)
+    return loaded
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="AI4S workflow-first paper daily runner")
     p.add_argument("--date", default="today", help="YYYY-MM-DD or 'today'")
@@ -1036,6 +1066,78 @@ def render_report(date_str: str, reviewed: list[ReviewedPaper]) -> str:
     return "\n".join(lines).strip() + "\n"
 
 
+def choose_publish_images(image_paths: list[str], *, limit: int, min_bytes: int) -> list[str]:
+    existing: list[Path] = []
+    for raw_path in image_paths:
+        path = Path(raw_path)
+        if path.is_file():
+            existing.append(path)
+    if not existing or limit <= 0:
+        return []
+    ranked = sorted(existing, key=lambda p: (p.stat().st_size, p.name.lower()), reverse=True)
+    filtered = [str(path) for path in ranked if path.stat().st_size >= min_bytes]
+    chosen = filtered[:limit]
+    if chosen:
+        return chosen
+    return [str(path) for path in ranked[:limit]]
+
+
+def insert_mineru_images_into_doc(run_dir: Path, *, doc_ref: str) -> dict[str, Any]:
+    status = {
+        "image_status": "skipped",
+        "inserted_images": 0,
+        "image_errors": [],
+    }
+    if not doc_ref:
+        status["image_errors"].append("missing doc ref")
+        return status
+    if os.environ.get("FEISHU_INSERT_MINERU_IMAGES", "1").lower() in {"0", "false", "no"}:
+        return status
+
+    reviewed_path = run_dir / "reviewed.json"
+    manifest_path = run_dir / "extraction_manifest.json"
+    if not reviewed_path.exists() or not manifest_path.exists():
+        status["image_errors"].append("missing reviewed.json or extraction_manifest.json")
+        return status
+
+    reviewed = json.loads(reviewed_path.read_text(encoding="utf-8"))
+    manifest = {
+        item["source_id"]: item
+        for item in json.loads(manifest_path.read_text(encoding="utf-8"))
+    }
+    image_limit = max(0, int(os.environ.get("FEISHU_IMAGE_LIMIT_PER_PAPER", "2")))
+    min_bytes = max(0, int(os.environ.get("FEISHU_IMAGE_MIN_BYTES", "50000")))
+
+    for item in reviewed:
+        manifest_item = manifest.get(item["source_id"], {})
+        chosen = choose_publish_images(manifest_item.get("image_paths", []), limit=image_limit, min_bytes=min_bytes)
+        anchor = f"[{item['index']}] {item['title']}"
+        for idx, image_path in enumerate(chosen, start=1):
+            cmd = [
+                "lark-cli", "docs", "+media-insert",
+                "--doc", doc_ref,
+                "--file", image_path,
+                "--caption", f"Figure {idx}: {item['title']}",
+                "--selection-with-ellipsis", anchor,
+                "--align", "center",
+            ]
+            proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
+            if proc.returncode != 0:
+                status["image_errors"].append(
+                    f"{item['source_id']}::{Path(image_path).name}: {(proc.stdout or proc.stderr).strip() or f'exit {proc.returncode}'}"
+                )
+                continue
+            status["inserted_images"] += 1
+
+    if status["inserted_images"] and status["image_errors"]:
+        status["image_status"] = "partial"
+    elif status["inserted_images"]:
+        status["image_status"] = "ok"
+    elif status["image_errors"]:
+        status["image_status"] = "failed"
+    return status
+
+
 def publish_to_feishu(run_dir: Path, report_text: str, *, skip: bool, require: bool) -> dict[str, Any]:
     status = {
         "required": require,
@@ -1044,6 +1146,9 @@ def publish_to_feishu(run_dir: Path, report_text: str, *, skip: bool, require: b
         "doc_url": "",
         "doc_token": "",
         "error": "",
+        "image_status": "skipped",
+        "inserted_images": 0,
+        "image_errors": [],
         "timestamp": dt.datetime.now(dt.UTC).isoformat(),
     }
     if skip:
@@ -1076,6 +1181,8 @@ def publish_to_feishu(run_dir: Path, report_text: str, *, skip: bool, require: b
             pass
         if doc and not status["doc_token"]:
             status["doc_token"] = doc
+        doc_ref = status["doc_token"] or status["doc_url"]
+        status.update(insert_mineru_images_into_doc(run_dir, doc_ref=doc_ref))
     except Exception as exc:
         status["status"] = "failed"
         status["error"] = str(exc)
@@ -1134,6 +1241,7 @@ def write_outputs(run_dir: Path, selected: list[ScoredCandidate], reviewed: list
 
 
 def run(argv: list[str] | None = None) -> int:
+    load_local_env()
     args = parse_args(argv)
     target_date = resolve_date(args.date)
     run_dir = Path(args.output_root) / target_date.isoformat()

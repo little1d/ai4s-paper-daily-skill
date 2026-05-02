@@ -54,6 +54,30 @@ description: "AI4S 论文日报 skill：helper script 负责选篇/MinerU/飞书
 
 如果拿不到足够可靠的全文，不要正式评分。
 
+### 4. 飞书配置优先读仓库内 `.env.local`
+
+skill / runner 启动时会优先读取仓库根目录的：
+
+- `.env.local`
+- `.env`
+
+典型配置：
+
+```bash
+FEISHU_WIKI_NODE=your_wiki_node_token
+FEISHU_DOC=
+FEISHU_TITLE_PREFIX="AI4S 论文速递"
+FEISHU_INSERT_MINERU_IMAGES=1
+FEISHU_IMAGE_LIMIT_PER_PAPER=2
+FEISHU_IMAGE_MIN_BYTES=50000
+```
+
+规则：
+
+- `FEISHU_DOC` 存在时：覆盖更新已有文档
+- 否则如果有 `FEISHU_WIKI_NODE`：新建到对应知识库节点
+- 图片插入默认开启，发布后自动把 MinerU 里挑出的关键图补到对应论文标题后
+
 ## 推荐工作流
 
 ### 第一步：筛候选
@@ -91,10 +115,10 @@ python .codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py \
 - 同目录下的 `*_content_list*.json`
 - 同目录下的图片资源（若有）
 
-如果 MinerU 没成功，再看：
+如果 MinerU 没成功：
 
-- `pdf_path`
-- 纯文本 fallback
+- 可以看 `pdf_path` 做人工核查
+- 但不要正式评分，不要走低质量自动 fallback
 
 ### 第三步：LLM 精读（核心）
 
@@ -219,6 +243,13 @@ lark-cli docs +media-insert \
 
 不要把所有图都塞进去。
 
+当前 runner 已支持自动插图：
+
+- 发布成功后会按文件大小优先选图
+- 默认每篇最多插 `2` 张
+- 插入位置是对应论文标题后
+- 结果会写回 `publish.json`
+
 ## Helper 文件
 
 - `.codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py`
@@ -238,4 +269,4 @@ lark-cli docs +media-insert \
 3. 有 `extraction_manifest.json`
 4. 单篇精读是 LLM 读全文后写的，不是规则拼句子
 5. 飞书文档能创建/更新
-6. 若 MinerU 有图片，至少支持手动或自动插图到飞书
+6. 若 MinerU 有图片，至少支持自动或手动插图到飞书

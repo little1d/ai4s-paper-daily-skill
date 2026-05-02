@@ -7,6 +7,7 @@
 - 对最终入选论文做 **全文门槛检查**
 - 由当前 Codex / Claude **读完全文后**产出中文精读模板 + 毒舌点评 + 10 分制评分
 - 写入 **飞书文档**
+- 自动把 MinerU 抽到的关键图插到对应论文条目后面
 - 优先使用 **MinerU** 做 PDF 全文解析，并默认强制走 CPU，避免 Apple GPU / MPS 路径不稳定
 
 ## 当前首版边界
@@ -105,6 +106,31 @@ python .codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py \
 
 后续由 skill 读取这些文件，完成真正的 LLM 精读。
 
+### 3. 飞书配置
+
+脚本会在启动时自动读取仓库根目录下的 `.env.local` 和 `.env`。
+
+可以直接参考：
+
+- `.env.local.example`
+
+最常见的配置是：
+
+```bash
+FEISHU_WIKI_NODE=your_wiki_node_token
+FEISHU_DOC=
+FEISHU_TITLE_PREFIX="AI4S 论文速递"
+FEISHU_INSERT_MINERU_IMAGES=1
+FEISHU_IMAGE_LIMIT_PER_PAPER=2
+FEISHU_IMAGE_MIN_BYTES=50000
+```
+
+说明：
+
+- 设置 `FEISHU_DOC` 时：覆盖更新已有文档
+- 只设置 `FEISHU_WIKI_NODE` 时：在对应知识库节点下新建日报
+- `FEISHU_INSERT_MINERU_IMAGES=1` 时：发布后自动把每篇论文挑出的 1~N 张关键图插到对应标题后
+- 图片默认按文件大小筛大图，避免把碎小裁片全塞进去
 
 ### 4. MinerU 模型缓存位置
 
@@ -153,7 +179,7 @@ OUTPUT_ROOT/
 - `reviewed.json`：正式入选并完成全文门槛的论文
 - `reviewed/*.md`：逐篇精读卡片
 - `report.md`：最终日报 markdown
-- `publish.json`：飞书写入结果
+- `publish.json`：飞书写入结果，包含文档链接、插图状态和插入数量
 
 ## 全文解析 backend
 
@@ -185,7 +211,7 @@ OUTPUT_ROOT/
 - 如何调用 helper script
 - 如何使用 MinerU 产物
 - 如何让 Codex / Claude 自己读全文并写精读
-- 如何把文档和图片写入飞书
+- 如何把文档和关键图片写入飞书
 
 ## 如何触发这个 skill
 
@@ -235,6 +261,8 @@ python .codex/skills/ai4s-paper-daily/scripts/ai4s_paper_daily.py \
 ```text
 $ai4s-paper-daily 请读取 outputs/daily-runs/YYYY-MM-DD/extraction_manifest.json，基于 MinerU 全文结果完成正式精读，并写入飞书文档
 ```
+
+如果 `.env.local` 已经配置了 `FEISHU_WIKI_NODE` 或 `FEISHU_DOC`，新的 Codex 会话直接跑脚本时也能拿到这些配置，不需要你每次手动 export。
 
 ### 触发时建议说清楚的东西
 
